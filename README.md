@@ -4,7 +4,7 @@
 1.	Пройти интерактивный redis tutorial
 2.	Запустить redis
 3.	Доработать приложение из предыдущей лабораторной работы таким образом, чтобы счетчик входящих запросов хранился в redis.
-##Ход работы.
+## Ход работы.
 1. Скачать и запустить redis
 2. Запустить OS Panel
 3. Код программы для взаимодействия с redis
@@ -44,7 +44,7 @@ echo "</pre>";
 ```
 
 # web2. Реализация партиционирования с использованием Postgres
-##Задание:
+## Задание:
 Для реализации данной лабораторной работы требуется:
 1.	Необходимо запустить СУБД с поддержкой партиционирования (например, postgres)
 2.	Создать таблицу с использованием партиционирования
@@ -53,7 +53,7 @@ echo "</pre>";
     *	добавления и удаления партиций
     *	создания глобальных и локальных индексов
     *	выборки данных и использованием индексов
-##Выполнение работы:
+## Выполнение работы:
 1. Создайте таблицу measurement как секционированную таблицу с предложением PARTITION BY, указав метод разбиения (в нашем случае RANGE) и список столбцов, которые будут образовывать ключ разбиения.
 ```
 CREATE TABLE measurement (
@@ -118,7 +118,7 @@ CREATE INDEX measurement_y2008m01_logdate ON measurement_y2008m01 (logdate);
 2.	Создать веб-сервис
 3.	Создать Dockerfile и запустить приложение в Docker
 4.	Создать docker-compose.yaml и запустить несколько контейнеров с использованием docker-compose
-##Выполнение работ
+## Выполнение работ
 Создайте новую директорию mkdir mydockerbuild.
 ```
 $ mkdir mydockerbuild
@@ -194,22 +194,21 @@ Successfully built 7d9495d03763
 
 Команда docker build -t docker-whale . открывает Dockerfile в текущей директории, и создает образ docker-whale на вашем компьютере. Выполнение команды занимает около минуты и вывод команды выглядит действительно большим. В этом разделе вы узнаете что означают эти сообщения.
 
-
 Первым делом Докер проверяет все ли необходимое есть для создания образа.
-
-
+```
 Sending build context to Docker daemon 158.8 MB
-
+```
 Затем, Docker загружает образ whalesay. У нас уже есть этот образ на локальном компьютере как вы можете помнить из предыдущего урока. Так что Docker не нужно скачивать его повторно.
 
-
-Step 1 : FROM docker/whalesay:latest
+Step 1 : 
+```FROM docker/whalesay:latest
  ---> fb434121fc77
-
+```
 Docker переходит к следующему шагу обновлению пакетного менеджера apt-get. В процессе выводится много строчек, нет нужды приводить их тут.
 
 
-Step 2 : RUN apt-get -y update && apt-get install -y fortunes
+Step 2 : 
+```RUN apt-get -y update && apt-get install -y fortunes
  ---> Running in 27d224dfa5b2
 Ign http://archive.ubuntu.com trusty InRelease
 Ign http://archive.ubuntu.com trusty-updates InRelease
@@ -220,12 +219,14 @@ Get:15 http://archive.ubuntu.com trusty-security/restricted amd64 Packages [14.8
 Get:16 http://archive.ubuntu.com trusty-security/universe amd64 Packages [134 kB]
 Reading package lists...
 ---> eb06e47a01d2
-
+```
 Затем Docker устанавливает fortunes.
 
-
+```
 Removing intermediate container e2a84b5f390f
-Step 3 : RUN apt-get install -y fortunes
+```
+Step 3 : 
+```RUN apt-get install -y fortunes
  ---> Running in 23aa52c1897c
 Reading package lists...
 Building dependency tree...
@@ -245,16 +246,16 @@ Setting up fortunes (1:1.99.1-7) ...
 Processing triggers for libc-bin (2.19-0ubuntu6.6) ...
  ---> c81071adeeb5
 Removing intermediate container 23aa52c1897c
-
+```
 Итак, Docker завершает создание образа и сообщает об этом в консоль.
 
-
-Step 4 : CMD /usr/games/fortune -a | cowsay
+Step 4 : 
+```CMD /usr/games/fortune -a | cowsay
  ---> Running in a8e6faa88df3
  ---> 7d9495d03763
 Removing intermediate container a8e6faa88df3
 Successfully built 7d9495d03763
-
+```
 Шаг 4: Запуск нового образа
 
 В этом шаге вы проверите образы на вашем компьютере, а за тем запустите ваш новый образ.
@@ -262,15 +263,17 @@ Successfully built 7d9495d03763
 Введите и выполните команду docker images в командной строке.
 
 Эта команда, как вы можете помнить, выводит список локальных образов в системе.
-
+```
 $ docker images
 REPOSITORY           TAG          IMAGE ID          CREATED             SIZE
 docker-whale         latest       7d9495d03763      4 minutes ago       273.7 MB
 docker/whalesay      latest       fb434121fc77      4 hours ago         247 MB
 hello-world          latest       91c95931e552      5 weeks ago         910 B
+```
 Запустите ваш новый образ командой docker run docker-whale.
-
+```
 $ docker run docker-whale
+```
  _________________________________________
 / "He was a modest, good-humored boy. It  \
 \ was Oxford that made him insufferable." /
