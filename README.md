@@ -4,10 +4,11 @@
 1.	Пройти интерактивный redis tutorial
 2.	Запустить redis
 3.	Доработать приложение из предыдущей лабораторной работы таким образом, чтобы счетчик входящих запросов хранился в redis.
-Ход работы.
-1 Скачать и запустить redis
-2 Запустить OS Panel
-3 Код программы для взаимодействия с redis
+##Ход работы.
+1. Скачать и запустить redis
+2. Запустить OS Panel
+3. Код программы для взаимодействия с redis
+```
 <?php
 $redis = new Redis();
 $redis->connect('127.0.0.1', 6379);
@@ -40,26 +41,31 @@ echo "<pre>";
 var_dump($taxi_car);
 echo "</pre>";
 ?>
- 
+```
+
 # web2. Реализация партиционирования с использованием Postgres
-Задание:
+##Задание:
 Для реализации данной лабораторной работы требуется:
 1.	Необходимо запустить СУБД с поддержкой партиционирования (например, postgres)
 2.	Создать таблицу с использованием партиционирования
 3.	Написать запросы:
-a.	вставки данных
-b.	добавления и удаления партиций
-c.	создания глобальных и локальных индексов
-d.	выборки данных и использованием индексов
-Выполнение работы:
-1 Создайте таблицу measurement как секционированную таблицу с предложением PARTITION BY, указав метод разбиения (в нашем случае RANGE) и список столбцов, которые будут образовывать ключ разбиения.
+    *	вставки данных
+    *	добавления и удаления партиций
+    *	создания глобальных и локальных индексов
+    *	выборки данных и использованием индексов
+##Выполнение работы:
+1. Создайте таблицу measurement как секционированную таблицу с предложением PARTITION BY, указав метод разбиения (в нашем случае RANGE) и список столбцов, которые будут образовывать ключ разбиения.
+```
 CREATE TABLE measurement (
     city_id         int not null,
     logdate         date not null,
     peaktemp        int,
     unitsales       int
 ) PARTITION BY RANGE (logdate);
-2 Для таблиц-секций нет необходимости определять ограничения с условиями, задающими границы значений. Нужные ограничения секций выводятся неявно из определения границ секции, когда требуется к ним обратиться.
+```
+
+2. Для таблиц-секций нет необходимости определять ограничения с условиями, задающими границы значений. Нужные ограничения секций выводятся неявно из определения границ секции, когда требуется к ним обратиться.
+```
 CREATE TABLE measurement_y2006m02 PARTITION OF measurement
     FOR VALUES FROM ('2006-02-01') TO ('2006-03-01');
 CREATE TABLE measurement_y2006m03 PARTITION OF measurement
@@ -74,31 +80,37 @@ CREATE TABLE measurement_y2008m01 PARTITION OF measurement
     FOR VALUES FROM ('2008-01-01') TO ('2008-02-01')
     WITH (parallel_workers = 4)
     TABLESPACE fasttablespace;
+```
 Для реализации вложенного секционирования укажите предложение PARTITION BY в командах, создающих отдельные секции, например:
 CREATE TABLE measurement_y2006m02 PARTITION OF measurement
-    FOR VALUES FROM ('2006-02-01') TO ('2006-03-01')
-    PARTITION BY RANGE (peaktemp);
-3 Создайте индекс по ключевому столбцу(ам), а также любые другие индексы, которые вы хотели бы иметь в каждой секции. (Индекс по ключу, строго говоря, не необходим, но в большинстве случаев он будет полезен. Если вы хотите, чтобы значения ключа были уникальны, вам следует также создать ограничения уникальности или первичного ключа для каждой секции.)
+```
+FOR VALUES FROM ('2006-02-01') TO ('2006-03-01')
+PARTITION BY RANGE (peaktemp);
+```
+    
+3. Создайте индекс по ключевому столбцу(ам), а также любые другие индексы, которые вы хотели бы иметь в каждой секции. (Индекс по ключу, строго говоря, не необходим, но в большинстве случаев он будет полезен. Если вы хотите, чтобы значения ключа были уникальны, вам следует также создать ограничения уникальности или первичного ключа для каждой секции.)
+```
 CREATE INDEX ON measurement_y2006m02 (logdate);
 CREATE INDEX ON measurement_y2006m03 (logdate);
 ...
 CREATE INDEX ON measurement_y2007m11 (logdate);
 CREATE INDEX ON measurement_y2007m12 (logdate);
 CREATE INDEX ON measurement_y2008m01 (logdate);
+```
 Самый лёгкий способ удалить старые данные — просто удалить секцию, ставшую ненужной:
-DROP TABLE measurement_y2006m02;
+```DROP TABLE measurement_y2006m02;```
 Ещё один часто более предпочтительный вариант — убрать секцию из главной таблицы, но сохранить возможность обращаться к ней как к самостоятельной таблице:
 
-ALTER TABLE measurement DETACH PARTITION measurement_y2006m02;
+```ALTER TABLE measurement DETACH PARTITION measurement_y2006m02;```
 
 Для каждой секции создайте индекс по ключевому столбцу(ам), а также любые другие индексы по своему усмотрению.
-
+```
 CREATE INDEX measurement_y2006m02_logdate ON measurement_y2006m02 (logdate);
 CREATE INDEX measurement_y2006m03_logdate ON measurement_y2006m03 (logdate);
 CREATE INDEX measurement_y2007m11_logdate ON measurement_y2007m11 (logdate);
 CREATE INDEX measurement_y2007m12_logdate ON measurement_y2007m12 (logdate);
 CREATE INDEX measurement_y2008m01_logdate ON measurement_y2008m01 (logdate);
-
+```
 # web4. Реализация запуска приложения с использованием Docker
 Во всех облачных платформах имеется возможность запуска приложений с использованием Kubernetes. Рассмотрение Docker является предварительным шагом перед запуском приложения в Kubernetes.
 Для реализации данной лабораторной работы требуется:
@@ -106,66 +118,77 @@ CREATE INDEX measurement_y2008m01_logdate ON measurement_y2008m01 (logdate);
 2.	Создать веб-сервис
 3.	Создать Dockerfile и запустить приложение в Docker
 4.	Создать docker-compose.yaml и запустить несколько контейнеров с использованием docker-compose
-Выполнение работ
+##Выполнение работ
 Создайте новую директорию mkdir mydockerbuild.
-
+```
 $ mkdir mydockerbuild
+```
 Этот каталог служит в качестве "контекста" для сборки. Контекст просто означает, что он содержит все, что вам нужно, чтобы построить свой образ.
 
 Войдите в созданную директорию.
-
+```
 $ cd mydockerbuild
+```
 Сейчас она пуста.
 
 Создайте Dockerfile в директории командой touch Dockerfile.
-
+```
 $ touch Dockerfile
+```
 Команда создает новый файл но ничего не выводит в консоль. Используйте команду ls Dockerfile что бы убедиться что файл создан.
-
+```
 $ ls Dockerfile
 Dockerfile
+```
 Откройте Dockerfile редакторе кода типа Atom или Sublime, или в текстовом редакторе, таком как vi, или nano (https://www.nano-editor.org/).
 
 Добавьте следующие строки:
-
+```
 FROM docker/whalesay:latest
+```
+
 Ключевое слово FROM говорит Docker какой образ будет базовым. Образ whalesay уже имеет программу cowsay по этому мы возьмем его за основу.
 
 Теперь добавим программу fortunes в наш образ.
-
+```
 RUN apt-get -y update && apt-get install -y fortunes
+```
 Программа fortunes имеет команду которая выводит мудрые фразы для нашего кита. Итак, первым шагом устанавливаем fortunes. Эта строка устанавливает программу в образ.
 
 После того как мы добавили в образ нужную нам программу, нужно добавить инструкцию запуска программы при старте контейнера.
-
+```
   CMD /usr/games/fortune -a | cowsay
+```
 Эта строка говорит программе fortune передать фразу программе cowsay.
 
 Теперь ваш Dockerfile должен выглядеть так:
-
+```
 FROM docker/whalesay:latest
 RUN apt-get -y update && apt-get install -y fortunes
 CMD /usr/games/fortune -a | cowsay
+```
 Сохраните и закройте Dockerfile.
 
 На этом этапе, в Dockerfile добавлены 
 Создание образа из Dockerfile
 
 Находясь в командной строке, убедитесь что Dockerfile расположен в текущем каталоге cat Dockerfile
-
+```
 $ cat Dockerfile
 FROM docker/whalesay:latest
 
 RUN apt-get -y update && apt-get install -y fortunes
 
 CMD /usr/games/fortune -a | cowsay
+```
 Теперь, соберем ваш новый образ набрав в терминале команду docker build -t docker-whale . (на забудьте точку через пробел в конце).
-
+```
 $ docker build -t docker-whale .
 Sending build context to Docker daemon 158.8 MB
 ...snip...
 Removing intermediate container a8e6faa88df3
 Successfully built 7d9495d03763
+```
 Выполнение команды занимает несколько секунд. Перед тем как вы начнете делать что либо с новым образом, уделите минуту что бы побольше узнать о процессе сборки образа из Dockerfile.
 Шаг 3: Узнайте больше о процессе сборки
 
@@ -268,12 +291,12 @@ $ docker run docker-whale
 Работа с docker compose
 
 Создайте каталог для проекта:
-
+```
 $ mkdir composetest
 $ cd composetest
-
+```
 В удобном для вас редакторе кода создайте файл app.py в каталоге проекта.
-
+```
 from flask import Flask
 from redis import Redis
 
@@ -287,10 +310,7 @@ def hello():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
-Создайте другой файл, с именем requirements.txt в каталоге проекта со следующим содержанием:
-
-flask
-redis
+  ```
 
 В нем указаны зависимости приложения.
 
@@ -298,25 +318,25 @@ redis
 
 В этом шаге, вы создадите новый образ Docker. Образ будет содержать все зависимости приложения Python включая сам Python.
 В каталоге вашего проекта создайте файл с именем Dockerfile и следующим содержанием:
-
+```
 FROM python:2.7
 ADD . /code
 WORKDIR /code
 RUN pip install -r requirements.txt
 CMD python app.py
-
+```
 Данные команды говорят Docker сделать следующее:
-
+```
 Создать образ взяв за основу образ Python 2.7.
 Добавить текущую директорию . в каталог /code в образе.
 Установить рабочую директорию /code.
 Установить Python зависимости.
 Задать команду по умолчанию для контейнера python app.py
-
+```
 Сборка образа.
-
+```
 $ docker build -t web .
-
+```
 Данная команда создает образ с названием web из содержимого текущего каталога. Команда автоматически находит Dockerfile, app.py и requirements.txt.
 
 Шаг 3: Описание сервисов
@@ -324,7 +344,7 @@ $ docker build -t web .
 Набор сервисов определяется с помощью файла docker-compose.yml:
 
 Создайте файл с именем docker-compose.yml в каталоге вашего проекта и следующим содержанием:
-
+```
 version: '2'
 services:
   web:
@@ -337,7 +357,7 @@ services:
      - redis
   redis:
     image: redis
-
+```
 В Compose файле определены два сервиса, web и redis. Web сервис:
 
 Создается из Dockerfile в текущем каталоге.
@@ -350,7 +370,7 @@ services:
 Шаг 4: Сборка и запуск вашего приложения в Compose
 
 Из директории с вашим проектом запустим приложение.
-
+```
 $ docker-compose up
 Pulling image redis...
 Building web...
@@ -359,7 +379,7 @@ Starting composetest_web_1...
 redis_1 | [8] 02 Jan 18:43:35.576 # Server started, Redis version 2.8.3
 web_1   |  * Running on http://0.0.0.0:5000/
 web_1   |  * Restarting with stat
-
+```
 Compose загружает образ Redis, собирает образ для выполнения вашего кода и запускает сервисы которые вы задали.
 
 Введите в браузере http://0.0.0.0:5000/ что бы убедиться что ваше приложение работает.
@@ -384,11 +404,16 @@ Hello World! I have been seen 1 times.
 Выполнение работ
 Распознование образов на питон
 Установка 
+```
 pip install tensorflow==2.4.0
+```
 установка
+```
 pip install keras==2.4.3 numpy==1.19.3 pillow==7.0.0 scipy==1.4.1 h5py==2.10.0 matplotlib==3.3.2 opencv-python keras-resnet==0.2.0
 pip install imageai --upgrade
+```
 Код
+```
 from imageai.Detection import ObjectDetection
 import os
 
@@ -402,5 +427,5 @@ detections = detector.detectObjectsFromImage(input_image=os.path.join(execution_
 
 for eachObject in detections:
     print(eachObject["name"] , " : " , eachObject["percentage_probability"] )
-      
+```
 
