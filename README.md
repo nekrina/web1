@@ -17,30 +17,85 @@ $redis->hset("taxi_car", "model", "ГАЗ 3110");
 $redis->hset("taxi_car", "Номер лицензии", "RO-01-PHP");
 $redis->hset("taxi_car", "Год изготовления", 1999);
 $redis->hset("taxi_car", "nr_starts", 0);
-/*
-$redis->hmset("taxi_car", array(
-    "brand" => "Волга",
-    "model" => "ГАЗ 3110",
-    "licence number" => "RO-01-PHP",
-    "year of fabrication" => 1999,
-    "nr_stats" => 0)
-);
-*/
-echo "Номер лицензии: " .
-    $redis->hget("taxi_car", "Номер лицензии") . "<br>";
 
-// удалить номер лицензии
-$redis->hdel("taxi_car", "Номер лицензии");
 
-// начало роста числа
-$redis->hincrby("taxi_car", "nr_starts", 1);
 
-$taxi_car = $redis->hgetall("taxi_car");
-echo "Вся информация о такси";
-echo "<pre>";
-var_dump($taxi_car);
-echo "</pre>";
 ?>
+<HTML>
+<blockquote>
+<p>
+<?php
+$list = "Список машин";
+$redis->rpush($list, "Волга");
+$redis->rpush($list, "lada");
+$redis->lpush($list, "BMW");
+//Количество элементов в списке
+echo "Количество доступных машин: " . $redis->llen($list) . "<br>";
+//Вывод списка
+$arList = $redis->lrange($list, 0, -1);
+echo "<pre>";
+print_r($arList);
+echo "</pre>";
+//Отображение 1 элемента в списке
+echo "Последняя машина в очереди: ";
+echo $redis->rpop($list) . "<br>";
+//Отображние последнего элемента в списке
+echo "Первая машина в очереди: ";
+echo $redis->lpop($list) . "<br>";
+//Отчистка
+if(isset($_POST['button_name'])){
+     $redis->delete($redis->keys('*'));
+    }
+?>
+</p></blockquote>
+<form method="POST" action="">
+<div style="display:inline-block">
+  <input type="submit" value="Добавить волгу" name="but" class="gradient-button" >
+  <input type = "submit" name="button_name" class="gradient-button" value = "Удалить" />
+</div>
+</form>
+</HTML>
+<style>
+
+.gradient-button {
+  text-decoration: none;
+  display: inline-block;
+  color: white;
+  padding: 20px 30px;
+  margin: 10px 20px;
+  border-radius: 10px;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  background-image: linear-gradient(to right, #9EEFE1 0%, #4830F0 51%, #9EEFE1 100%);
+  background-size: 200% auto;
+  box-shadow: 0 0 20px rgba(0, 0, 0, .1);
+  transition: .5s;
+ 
+}
+.gradient-button:hover {
+  background-position: right center;
+}
+
+blockquote {
+margin: 0;
+background: #BCE8EA;
+color: #131314;
+padding: 30px 30px 30px 90px;
+position: relative;
+font-family: 'Lato', sans-serif;
+}
+
+blockquote p {
+margin-top: 0;
+font-size: 24px;
+font-weight: 300;
+}
+blockquote cite {
+font-style: normal;
+text-transform: uppercase;
+}
+</style>
 ```
 
 # web2. Реализация партиционирования с использованием Postgres
@@ -431,4 +486,45 @@ detections = detector.detectObjectsFromImage(input_image=os.path.join(execution_
 for eachObject in detections:
     print(eachObject["name"] , " : " , eachObject["percentage_probability"] )
 ```
+# web6. S3
+```
+//Подключение 
+import boto3
+session = boto3.session.Session()
+s3_client = session.client(
+    service_name = 's3',
+    endpoint_url = 'https://hb.bizmrg.com',
+    aws_access_key_id = 'ioJHUeiHLHF9b8sW2eLBsc',
+    aws_secret_access_key = '5sSENeUviPoFp7c6nZ6c5GTJzguLzcezofd1tJig3dKc'
+)
+test_bucket_name = 'boto3-test-bucket-name'
+// Создаем бакет
+s3_client.create_bucket(Bucket=test_bucket_name)
+response = s3_client.list_buckets()
+print(response)
+//Получение списка бакетов
+for key in response['Buckets']:
+    print(key['Name'])
 
+    test_bucket_name = 'boto3-test-bucket-name'
+
+    // Загрузка данных из строки
+    s3_client.put_object(Body='TEST_TEXT_TEST_TEXT', Bucket=test_bucket_name, Key='test_file.txt')
+
+    // Загрузка локального файла в бакет
+    s3_client.upload_file('some_test_file_from_local.txt', test_bucket_name, 'copy_some_test_file.txt')
+
+    // Загрузка локального файла в директорию внутри бакета
+    s3_client.upload_file('some_test_file_from_local.txt', test_bucket_name, 'backup_dir/copy_some_test_file.txt')
+
+
+response = s3_client.get_object(Bucket='boto3-test-bucket-name', Key='test_file.txt')
+print(response)
+print(response['Body'].read())
+
+
+test_bucket_name = 'boto3-test-bucket-name'
+//Получение списка объектов
+for key in s3_client.list_objects(Bucket=test_bucket_name)['Contents']:
+    print(key['Key'])
+    ```
